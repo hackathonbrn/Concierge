@@ -1,0 +1,15 @@
+{
+  "name": "hackathon",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "start": "bun ./service/index.ts",
+    "clean": "rm -rf guard.db",
+    "forget": "sqlite guard.db \"DROP TABLE history;\" && sqlite guard.db \"DROP TABLE access;\""
+  }
+}
