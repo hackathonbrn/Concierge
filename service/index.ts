@@ -20,7 +20,10 @@ Bun.serve({
     }
 
     const url = new URL(req.url);
-    const ip = this.requestIP(req)?.address.toString() ?? "unknown";
+    const ip =
+      req.headers.get("TG-ID") ??
+      this.requestIP(req)?.address.toString() ??
+      "unknown";
 
     if (
       url.pathname.startsWith("/admin") &&
@@ -44,8 +47,12 @@ Bun.serve({
     }
 
     if (url.pathname === "/admin/prompt" && req.method === "POST") {
-      const { prompt } = (await req.json()) as { prompt: string };
-      return cors(await adminPromptSet(prompt));
+      const { criteria, topic, personality } = (await req.json()) as {
+        criteria: string;
+        topic?: string;
+        personality?: string;
+      };
+      return cors(await adminPromptSet(criteria, topic, personality));
     }
 
     if (url.pathname === "/chat" && req.method === "POST") {

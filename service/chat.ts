@@ -55,11 +55,15 @@ export async function chatHistoryGet(ip: string) {
   if (!history.length) {
     console.log("Generating history for new user...");
 
-    const { plan } = db.query("SELECT plan FROM guard").get() as {
+    const { plan, topic, personality } = db
+      .query("SELECT plan, topic, personality FROM guard")
+      .get() as {
       plan: string;
+      topic: string;
+      personality: string;
     };
 
-    const systemPrompt = chatSystem(plan);
+    const systemPrompt = chatSystem(plan, topic, personality);
 
     db.run("INSERT INTO history (ip, role, content) VALUES (?, ?, ?)", [
       ip,
@@ -87,12 +91,15 @@ export async function chatComplete(ip: string) {
     .query("SELECT role, content FROM history WHERE ip = ?")
     .all(ip) as LLMHistory;
 
-  const { prompt, plan } = db.query("SELECT prompt, plan FROM guard").get() as {
-    prompt: string;
+  const { criteria, topic, plan } = db
+    .query("SELECT criteria, topic, plan FROM guard")
+    .get() as {
+    criteria: string;
+    topic: string;
     plan: string;
   };
 
-  const decision = await evaluateAccess(prompt, plan, history);
+  const decision = await evaluateAccess(criteria, topic, plan, history);
   console.log("Decision made:", decision);
 
   if (decision.access) {

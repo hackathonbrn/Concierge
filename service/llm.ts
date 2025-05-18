@@ -15,7 +15,11 @@ export type LLMHistory = {
   content: string;
 }[];
 
-export async function generateSecurityPlan(prompt: string) {
+export async function generateSecurityPlan(
+  criteria: string,
+  topic: string,
+  personality: string
+) {
   const response = await fetch(process.env.LLM_URL!, {
     method: "POST",
     headers: {
@@ -26,8 +30,8 @@ export async function generateSecurityPlan(prompt: string) {
       model: process.env.REASONING_MODEL,
       stream: false,
       messages: [
-        { role: "system", content: planSystem() },
-        { role: "user", content: planEntry(prompt) },
+        { role: "system", content: planSystem(topic, personality) },
+        { role: "user", content: planEntry(criteria) },
       ],
       temperature: 0.1,
     }),
@@ -70,7 +74,6 @@ export async function generateAgentResponse(history: LLMHistory) {
     console.dir(data, { depth: 8 });
   }
 
-  console.log(data.message?.content);
   return (data.choices?.[0].message.content ?? data.message?.content)?.replace(
     /^[\s\S]*<\/think>\s*/,
     ""
@@ -78,7 +81,8 @@ export async function generateAgentResponse(history: LLMHistory) {
 }
 
 export async function evaluateAccess(
-  prompt: string,
+  criteria: string,
+  topic: string,
   plan: string,
   history: LLMHistory
 ) {
@@ -92,7 +96,7 @@ export async function evaluateAccess(
       model: process.env.REASONING_MODEL,
       stream: false,
       messages: [
-        { role: "system", content: evaluateSystem(prompt, plan) },
+        { role: "system", content: evaluateSystem(criteria, topic, plan) },
         { role: "user", content: evaluateEntry(history) },
       ],
     }),
