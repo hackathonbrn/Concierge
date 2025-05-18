@@ -15,6 +15,13 @@ export type EvaluationResult = {
   };
 };
 
+export type PromptSettings = {
+  criteria: string;
+  topic: string;
+  personality: string;
+  plan: string;
+};
+
 const API_URL = "http://192.168.31.43:3000";
 
 // Get chat history
@@ -101,5 +108,55 @@ export async function getEvaluationResult(): Promise<EvaluationResult> {
         reason: "Error evaluating access. Please try again later.",
       },
     };
+  }
+}
+
+// Get current prompt settings
+export async function getPromptSettings(
+  token: string
+): Promise<PromptSettings | null> {
+  try {
+    const response = await fetch(`${API_URL}/admin/prompt`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to get prompt settings");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error getting prompt settings:", error);
+    return null;
+  }
+}
+
+// Update prompt settings
+export async function updatePromptSettings(
+  token: string,
+  settings: { criteria: string; topic: string; personality: string }
+): Promise<PromptSettings | null> {
+  try {
+    const response = await fetch(`${API_URL}/admin/prompt`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update prompt settings");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating prompt settings:", error);
+    return null;
   }
 }
