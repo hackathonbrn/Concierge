@@ -12,6 +12,7 @@ export async function chatMessagePost(ip: string, message: string) {
     return new Response("Request history first!", { status: 403 });
   }
 
+  console.log("User said:", message);
   history.push({ role: "user", content: message });
 
   const agentResponse = await generateAgentResponse(history);
